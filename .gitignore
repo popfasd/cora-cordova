@@ -1,2 +1,4 @@
 platforms/android/build
 platforms/android/assets
+platforms/android/.gradle
+platforms/android/CordovaLib/build
