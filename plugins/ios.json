@@ -9,6 +9,12 @@
     "installed_plugins": {
         "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "ca.fasdoutreach.cora"
+        },
+        "cordova-plugin-device": {
+            "PACKAGE_NAME": "ca.fasdoutreach.cora"
+        },
+        "cordova-plugin-statusbar": {
+            "PACKAGE_NAME": "ca.fasdoutreach.cora"
         }
     },
     "dependent_plugins": {}

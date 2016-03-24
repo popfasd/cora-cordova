@@ -1,29 +1,29 @@
 /**
  * CORA - Classroom Observation Recording Application
- * Copyright (C) 2012  POPFASD (Provincial Outreach Program for Fetal
+ * Copyright (C) 2016  POPFASD (Provincial Outreach Program for Fetal
  * Alcohol Spectrum Disorder)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * http://cora.fasdoutreach.ca/LICENSE.txt
  *
  * @author Matt Ferris <mferris@sd57.bc.ca>
- * @version 1.1
+ * @version 1.3
  */
 
 /*
  * Quiet all console.log messages
  */
-console.log = function () {};
- 
+//console.log = function () {};
+
 /*
  * Add trim to String for browsers that don't yet use EMCAScript5
  */
@@ -34,7 +34,7 @@ if (!String.prototype.trim)
 		return this.replace(/^\s+|\s+$/g, '');
 	}
 }
- 
+
 /**
  * Define the cora container object
  */
@@ -52,7 +52,7 @@ cora.Date = function ( string )
 	var date = new Date(string);
 	var months = [
 		'January', 'February', 'March', 'April', 'May', 'June',
-		'July', 'August', 'September', 'Octoboer', 'November', 'December'
+		'July', 'August', 'September', 'October', 'November', 'December'
 		];
 	var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 	var that = {};
@@ -297,7 +297,7 @@ cora.removeNote = cora.removeEntity;
 		});
 	}
  };
- 
+
 /**
  * Get an array of all notes
  * @param {function} callback Callback function
@@ -345,7 +345,7 @@ cora.removeTag = cora.removeEntity;
 		});
 	}
  };
- 
+
 /**
  * Get tag given a name
  * @param {string} name Name of the tag
@@ -380,7 +380,8 @@ cora.suggestTags = function (inputValue, formId)
 	if (tag != '')
 	{
 		cora.Tag.all().filter('name', 'like', tag+'%').list(function (tags) {
-			$(formId+'-tags-suggestions ul').empty();
+            var tagSuggestionList = $(formId+'-tags-suggestions-list');
+			tagSuggestionList.empty();
 			var numSuggestions = 0;
 			var maxSuggestions = 5;
 			for (var i=0; i<tags.length; i++)
@@ -402,7 +403,7 @@ cora.suggestTags = function (inputValue, formId)
 					if (numSuggestions < maxSuggestions)
 					{
 						numSuggestions++;
-						$(formId+'-tags-suggestions ul').append(
+						tagSuggestionList.append(
 							'<li><a href="#">'+tags[i].name+'</li>'
 						);
 					}
@@ -413,19 +414,21 @@ cora.suggestTags = function (inputValue, formId)
 				}
 			}
 			/*$('#note-form-tags-suggestions ul').listview('refresh');*/
-			$(formId+'-tags-suggestions ul').show();
+			tagSuggestionList.show();
 			cora.suggestTagsTimeout = null;
 			$(formId+'-tags-suggestions a').click(function (e) {
 				e.preventDefault();
 				e.stopImmediatePropagation();
 				var tag = $(this).html();
-				var taglist = $(formId+'-tags').attr('value');
-				taglist = taglist.split(',');
-				for (var i=0; i<taglist.length; i++) taglist[i] = taglist[i].trim();
-				taglist.pop();
-				taglist.push(tag);
-				$(formId+'-tags').attr('value', taglist.join(', '));
-				$(formId+'-tags-suggestions ul').hide();
+                var tagList = $(formId+'-tags');
+				var tags = tagList.val();
+				tags = tags.split(',');
+				for (var i=0; i<tags.length; i++) tags[i] = tags[i].trim();
+				tags.pop();
+				tags.push(tag);
+				tagList.val(tags.join(', ')+', ');
+                tagList.focus();
+				tagSuggestionList.hide();
 			});
 		});
 	}
@@ -449,7 +452,7 @@ cora.Exceptions = {
 cora.View = function (id, my) {
     my = my || {};
     var that = {};
-    
+
     var jq = $('#'+id);
     if (jq.length != 1)
     {
@@ -457,7 +460,7 @@ cora.View = function (id, my) {
     }
     my.view = $(jq.get(0));
     my.id = id;
-    
+
     that.data = function ( name, value ) {
         if (arguments.length == 1)
         {
@@ -481,7 +484,7 @@ cora.View = function (id, my) {
             return data;
         }
     };
-    
+
     that.clearData = function ( name ) {
         if (!name) {
             foreach (k in my.view.data())
@@ -498,7 +501,7 @@ cora.View = function (id, my) {
         }
         return that;
     };
-    
+
     that.getChild = function ( name ) {
         var jq = $('#'+id+'-'+name);
         if (jq.length != 1)
@@ -507,19 +510,27 @@ cora.View = function (id, my) {
         }
         return $(jq.get(0));
     };
-    
+
     that.getId = function () {
         return my.id;
     };
-    
+
     that.getSelector = function () {
         return '#'+my.id;
     };
-    
+
     that.find = function ( selector ) {
-        return my.view.find(selector);
+        if (selector.charAt(0) == '#')
+        {
+            // if we're looking for an id, it's faster to skip .find()
+            return $(selector);
+        }
+        else
+        {
+            return my.view.find(selector);
+        }
     };
-    
+
     return that;
 };
 
@@ -533,17 +544,17 @@ cora.PageView = function ( name, my ) {
     that.markDirty = function () {
         my.view.data('cora.clean', false);
     };
-    
+
     that.markClean = function () {
         my.view.data('cora.clean', true);
     };
-    
+
     that.isClean = function () {
         var clean = my.view.data('cora.clean');
         if (clean) return true;
         else return false;
     };
-    
+
     return that;
 };
 
@@ -553,12 +564,12 @@ cora.PageView = function ( name, my ) {
 cora.DialogView = function ( name, my ) {
     my = my || {};
     var that = cora.View('dialog-'+name, my);
-    
+
     that.close = function () {
         my.view.dialog('close');
         return that;
     };
-    
+
     return that;
 };
 
@@ -602,7 +613,7 @@ cora.showDialog = function ( dialog, options )
     options.transition = options.transition || 'pop';
     options.reverse = options.reverse || false;
     options.changeHash = options.changeHash || false;
-    
+
     var parts = [];
     for (k in options.params)
     {
@@ -642,10 +653,7 @@ cora.Controller = {
                 console.log('not redrawing #home, nothing changed');
                 return;
             }
-            
-            view.find('form.ui-listview-filter input[data-type="search"]').attr('value', '');
-            view.find('form.ui-listview-filter a.ui-input-clear').addClass('ui-input-clear-hidden');
-            
+
             cora.getAllStudents(function (students) {
                 /*
                  * Determine sort order of list
@@ -670,7 +678,7 @@ cora.Controller = {
                                 return 0;
                             }
                         });
-                    }				
+                    }
                 }
                 var html = '';
                 for (var i=0; i<students.length; i++)
@@ -687,8 +695,9 @@ cora.Controller = {
                     }
                     html += '<li><a href="#student?sid='+s.id+'">'+name+'</a></li>';
                 }
-                view.find('div[data-role="content"] > ul').html(html);
-                view.find('div[data-role="content"] > ul').listview('refresh');
+                var studentList = view.find('#home-student-list');
+                studentList.html(html);
+                studentList.listview('refresh');
             });
             view.markClean();
         });
@@ -881,7 +890,7 @@ cora.Controller = {
                                         var day = cd;
                                         var dd = d.getNoteDate();
                                         html += '<li data-role="list-divider">'+
-                                            d.getNoteDateAsString()+'</li>';											
+                                            d.getNoteDateAsString()+'</li>';
                                     }
                                     html += '<li><a href="#note?sid='+student.id+'&nid='+n.id+'">'+
                                         '<p class="note-time">'+d.getNoteTimeAsString()+'</p>'+
@@ -944,18 +953,19 @@ cora.Controller = {
             });
 
             // hide tag suggestions when focus changes to any field
-            view.find('*').focusin(function () {
-                tagSuggestionsList.hide();
-            });
-                 
+            var focusinfx = function () { tagSuggestionsList.hide(); };
+            studentNameField.focusin(focusinfx);
+            tagField.focusin(focusinfx);
+            contentField.focusin(focusinfx);
+
             // bind to submit
             view.getChild('form').submit(cora.Controller.onSubmitNoteForm);
-            
+
             // Reset form fields
             contentField.val('');
             view.find('form :input').val('');
             view.find('form label').removeClass('form-validation-error');
-            
+
             // setup cancel button
             backButton.click(function () {
                 view.data('noteText', contentField.val())
@@ -1060,13 +1070,13 @@ cora.Controller = {
 
         // reset validation errors
 		view.find('form label').removeClass('form-validation-error');
-        
+
 		var noteId = view.getChild('note-id').val();
 		var studentId = view.getChild('student-id').val();
 		var formTags = view.getChild('tags').val();
 		var content = view.getChild('content').val();
-        
-		if ((noteId !== '' && content !== '') 
+
+		if ((noteId !== '' && content !== '')
 			|| (!noteId && studentId !== '' && content !== ''))
 		{
 			/*
@@ -1194,7 +1204,7 @@ cora.Controller = {
 									{
 										tag = cora.createTag(tname);
                                         manageTagsView.markDirty();
-										
+
 									}
 									note.tags.add(tag);
 								}
@@ -1221,7 +1231,7 @@ cora.Controller = {
 			{
 				view.getChid('content-label').addClass('form-validation-error');
 			}
-		}		
+		}
 		return false;
 	},
 	/**
@@ -1265,10 +1275,10 @@ cora.Controller = {
             var backButton = view.getChild('button-back');
             var editButton = view.getChild('button-edit');
 
-            var studentContainer = view.find('p.note-student');
-            var createdContainer = view.find('p.note-created');
-            var contentContainer = view.find('p.note-content');
-            var tagsContainer = view.find('p.note-tags');
+            var studentContainer = view.getChild('student');
+            var createdContainer = view.getChild('created');
+            var contentContainer = view.getChild('content');
+            var tagsContainer = view.getChild('tags');
 
             deleteButton.click(function (e) {
                 e.preventDefault();
@@ -1307,7 +1317,7 @@ cora.Controller = {
                     }
                     else
                     {
-                        cora.showDialog(objectDoesntExistDialog);			
+                        cora.showDialog(objectDoesntExistDialog);
                     }
                 });
             }
@@ -1329,8 +1339,6 @@ cora.Controller = {
             var noteId = params.nid;
             var studentId = params.sid;
 
-            var studentView = cora.PageView('student');
-
             var deleteButton = view.getChild('button-delete');
             var cancelButton = view.getChild('button-cancel');
 
@@ -1343,7 +1351,6 @@ cora.Controller = {
                     cora.getNoteById(noteId, function (note) {
                         cora.removeNote(note);
                         persistence.flush(function () {
-                            studentView.markDirty();
                             cora.redirect('#student?sid='+studentId, {
                                 transition: 'pop', reverse: true
                             });
@@ -1359,11 +1366,16 @@ cora.Controller = {
                     e.preventDefault();
                     e.stopImmediatePropagation();
                     cora.getStudentById(studentId, function (student) {
-                        cora.removeStudent(student);
-                        persistence.flush(function () {
-                            cora.PageView('home').markDirty();
-                            cora.redirect('#home', {
-                                transition: 'pop', reverse: true
+                        student.notes.list(function (notes) {
+                            for (var i=0; i<notes.length; i++) {
+                                cora.removeNote(notes[i]);
+                            }
+                            cora.removeStudent(student);
+                            persistence.flush(function () {
+                                cora.PageView('home').markDirty();
+                                cora.redirect('#home', {
+                                    transition: 'pop', reverse: true
+                                });
                             });
                         });
                         return false;
@@ -1472,7 +1484,7 @@ cora.Controller = {
 
             // bind to submit handler
             form.submit(cora.Controller.onSubmitShowManageTagsForm);
-            
+
             saveButton.click(function (e) {
                 e.preventDefault();
                 form.submit()
@@ -1569,7 +1581,7 @@ cora.Controller = {
             tagsField.keyup(function (e) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
-                var inputValue = $(this).attr('value');
+                var inputValue = $(this).val();
                 if (cora.suggestTagsTimeout !== null)
                 {
                     clearTimeout(cora.suggestTagsTimeout);
@@ -1580,7 +1592,7 @@ cora.Controller = {
                 tagSuggestionsList.hide();
             });
             // bind to submit
-            form.submit(function ( e ){       
+            form.submit(function ( e ){
                 var tags = tagsField.val();
                 tagsField.val('');
                 resultsView.data('tags', tags);
@@ -1598,7 +1610,7 @@ cora.Controller = {
         e.stopImmediatePropagation();
 
         var resultsView = cora.PageView('options-reports-results');
-        var formView = cora.PageView('options-reports-form');
+        var formView = cora.PageView('options-reports');
 
         var criteriaContainer = resultsView.getChild('criteria');
         var dataContainer = resultsView.getChild('data');
@@ -1606,11 +1618,6 @@ cora.Controller = {
 
 		var formTags = resultsView.data('tags');
         formTags = formTags.split(',');
-
-        // reset content
-        criteriaContainer.html(
-            'Displaying all notes tagged with <i>'+formTags.join('</i> and <i>')+'</i>'
-        );
 
         refineButton.click(function (e) {
             e.preventDefault();
@@ -1622,10 +1629,11 @@ cora.Controller = {
         });
 
         var tagsqc = cora.Tag.all();
+        var criteria = [];
         for (var i=0; i<formTags.length; i++)
         {
             var tagName = formTags[i];
-            if (tagName == '') continue
+            if (tagName == '' || tagName.match(/^\s+$/)) continue
             if (i === 0)
             {
                 tagsqc = tagsqc.filter('name', '=', tagName);
@@ -1634,13 +1642,20 @@ cora.Controller = {
             {
                 tagsqc = tagsqc.and(new persistence.PropertyFilter('name', '=', tagName));
             }
+            criteria.push(tagName);
         }
+
+        // reset content
+        criteriaContainer.html(
+            'Displaying all notes tagged with <i>'+criteria.join('</i> and <i>')+'</i>'
+        );
 
         tagsqc.list(function (tags) {
             if (tags.length === 0)
             {
                 dataContainer.html('<p><i>No matching notes found</i></p>');
             }
+            var studentNotesLists = {};
             for (var i=0; i<tags.length; i++)
             {
                 var tag = tags[i];
@@ -1648,26 +1663,27 @@ cora.Controller = {
                     for (var j=0; j<notes.length; j++)
                     {
                         var note = notes[j];
-                        var studentNotes = $('#sid-'+note.student.id+' ul');
-                        if (studentNotes.length === 0)
+                        //var studentNotesList = $('#sid-'+note.student.id+' ul');
+                        if (typeof studentNotesLists[note.student.id] === 'undefined')
                         {
                             dataContainer.append(
                                 '<div id="sid-'+note.student.id+'" data-role="collapsible" data-inset="false">'+
                                 '<h2>'+note.student.firstName+' '+note.student.lastName+'</h2>'+
                                 '<ul data-role="listview"></ul></div>'
                             );
-                            var studentNotes = $('#sid-'+note.student.id+' ul');
-                            $('#sid-'+note.student.id).collapsible();
-                            studentNotes.listview();
+                            var studentNotes = $('#sid-'+note.student.id);
+                            studentNotes.collapsible();
+                            studentNotesLists[note.student.id] = studentNotes.find('ul');
+                            studentNotesLists[note.student.id].listview();
                         }
-                        studentNotes.append(
+                        studentNotesLists[note.student.id].append(
                             '<li>'+
                             '<p class="note-time">'+cora.Date(note.created).getNoteTimeAsString()+'</p>'+
 							'<p class="note-teaser">'+note.content+'</p></a></li>'
                         );
-                        studentNotes.listview('refresh');
+                        studentNotesLists[note.student.id].listview('refresh');
                     }
-                });               
+                });
             }
             cora.redirect('#options-reports-results', {
                 reverse: false, changeHash: false

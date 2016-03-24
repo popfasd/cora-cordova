@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>BA0F6900-88FD-45C6-9413-7701D190A8AF</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Cora</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>20DB77A3EB8C8ADB2883CF152425C3FB17E0575B</key>
+		<string>github.com:popfasd/cora-cordova.git</string>
+		<key>BB5735189C8B8761D48191799AFC22CAA3BE9EFB</key>
+		<string>https://github.com/popfasd/cora.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>platforms/ios/Cora.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>20DB77A3EB8C8ADB2883CF152425C3FB17E0575B</key>
+		<string>../../../..</string>
+		<key>BB5735189C8B8761D48191799AFC22CAA3BE9EFB</key>
+		<string>../../../..www/</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>github.com:popfasd/cora-cordova.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>20DB77A3EB8C8ADB2883CF152425C3FB17E0575B</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>20DB77A3EB8C8ADB2883CF152425C3FB17E0575B</string>
+			<key>IDESourceControlWCCName</key>
+			<string>cora-cordova</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>BB5735189C8B8761D48191799AFC22CAA3BE9EFB</string>
+			<key>IDESourceControlWCCName</key>
+			<string>www</string>
+		</dict>
+	</array>
+</dict>
+</plist>
